@@ -107,9 +107,37 @@ export function parse(src) {
 // Canonical spellings for built-in names.
 export const ALIASES = {
   w: 'ω', omega: 'ω', 'ω': 'ω',
-  e0: 'ε₀', eps0: 'ε₀', epsilon0: 'ε₀', 'ε0': 'ε₀', 'ε₀': 'ε₀',
-  g0: 'Γ₀', G0: 'Γ₀', gamma0: 'Γ₀', Gamma0: 'Γ₀', 'Γ0': 'Γ₀', 'Γ₀': 'Γ₀',
+  e0: 'ε₀', e_0: 'ε₀', eps0: 'ε₀', eps_0: 'ε₀',
+  g0: 'Γ₀', G0: 'Γ₀', g_0: 'Γ₀', G_0: 'Γ₀',
 };
+
+const GREEK = {
+  alpha: 'α', beta: 'β', gamma: 'γ', delta: 'δ', epsilon: 'ε', zeta: 'ζ', eta: 'η',
+  theta: 'θ', iota: 'ι', kappa: 'κ', lambda: 'λ', mu: 'μ', nu: 'ν', xi: 'ξ', pi: 'π',
+  rho: 'ρ', sigma: 'σ', tau: 'τ', upsilon: 'υ', phi: 'φ', chi: 'χ', psi: 'ψ', omega: 'ω',
+  Gamma: 'Γ', Delta: 'Δ', Theta: 'Θ', Lambda: 'Λ', Xi: 'Ξ', Pi: 'Π', Sigma: 'Σ',
+  Upsilon: 'Υ', Phi: 'Φ', Psi: 'Ψ', Omega: 'Ω',
+};
+// Greek letters that conventionally appear capitalised in ordinal notation,
+// so lowercase spellings like "gamma_0" still mean Γ₀.
+const PREFER_CAPITAL = { gamma: 'Γ' };
+const SUB = '₀₁₂₃₄₅₆₇₈₉';
+
+// Canonical spelling of an identifier: "epsilon_0" / "epsilon0" / "ε0" -> "ε₀",
+// "Gamma_0" / "gamma_0" -> "Γ₀", "omega" -> "ω". Other names pass through.
+export function canonicalName(name) {
+  if (ALIASES[name]) return ALIASES[name];
+  const m = /^([A-Za-z]+|[\u0370-\u03ff])_?([0-9\u2080-\u2089]*)$/.exec(name);
+  if (!m) return name;
+  let [, word, idx] = m;
+  if (/^[A-Za-z]+$/.test(word)) {
+    const lw = word.toLowerCase();
+    const g = PREFER_CAPITAL[lw] ?? GREEK[word] ?? GREEK[lw];
+    if (!g) return name;
+    word = g;
+  }
+  return word + idx.replace(/[0-9]/g, d => SUB[d]);
+}
 
 // Pretty-print an AST in conventional ordinal notation.
 export function pretty(e, ctx = {}) {
@@ -122,7 +150,7 @@ export function pretty(e, ctx = {}) {
     case 'lit': return `[${e.v}]`;
     case 'id': return ctx.idLabel?.(e.v) ?? `#${e.v}`;
     case 'hist': return ctx.histLabel?.(e.v) ?? `$${e.v}`;
-    case 'name': return ALIASES[e.v] ?? e.v;
+    case 'name': return canonicalName(e.v);
     case 'assign': return pretty(e.e, ctx);
     case 'cmp': return `${pretty(e.a, ctx)} ${e.op} ${pretty(e.b, ctx)}`;
     case 'add': return `${P(e.a, 1)} + ${P(e.b, 2)}`;
@@ -166,12 +194,12 @@ export function evaluate(e, env) {
     case 'lit': return ret(E.normalize(e.v));
     case 'id': return ret(env.lookupId(e.v));
     case 'hist': return ret(env.lookupHist(e.v));
-    case 'name': return ret(env.lookupName(ALIASES[e.v] ?? e.v));
+    case 'name': return ret(env.lookupName(canonicalName(e.v)));
     case 'assign': return evaluate(e.e, env);
     case 'add': return ret(S(E.add(pat(e.a), pat(e.b))));
     case 'mul': return ret(S(E.mul(pat(e.a), pat(e.b))));
     case 'pow': {
-      if (e.a.k === 'name' && ALIASES[e.a.v] === 'ω') return ret(S(E.exp(pat(e.b))));
+      if (e.a.k === 'name' && canonicalName(e.a.v) === 'ω') return ret(S(E.exp(pat(e.b))));
       if (e.b.k !== 'num') throw new Error('Only ω^x or x^n (n a natural number) are supported.');
       if (e.b.v === 0) return ret(natural(1));
       const base = pat(e.a);

@@ -1,6 +1,6 @@
 // app.js -- calculator UI.
 import { Engine, patternId, decodePattern } from './engine.js';
-import { parse, pretty, evaluate } from './lang.js';
+import { parse, pretty, evaluate, canonicalName } from './lang.js';
 import { renderPattern } from './render.js';
 
 const $ = s => document.querySelector(s);
@@ -74,8 +74,9 @@ function run() {
       showVerdict(label, r);
       return;
     }
-    if (ast.k === 'assign') state.names[ast.name] = r.p;
-    state.history.push({ expr: src, label: ast.k === 'assign' ? `${ast.name} = ${label}` : label, p: r.p, marks: r.marks, ms });
+    const aname = ast.k === 'assign' ? canonicalName(ast.name) : null;
+    if (aname) state.names[aname] = r.p;
+    state.history.push({ expr: src, label: aname ? `${aname} = ${label}` : label, p: r.p, marks: r.marks, ms });
     save();
     $('#input').value = '';
     renderAll();
