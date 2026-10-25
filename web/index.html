@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Patterns of Resemblance Calculator</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>Patterns of Resemblance <span>Calculator</span></h1>
+    <div id="status"></div>
+  </header>
+  <main>
+    <section id="left">
+      <div id="display"></div>
+      <div id="verdict"></div>
+      <div class="entry">
+        <input id="input" autocomplete="off" spellcheck="false" placeholder="e.g.  Γ₀·ε₀ + ω^(ω+1)">
+        <label class="toggle"><input type="checkbox" id="autosimp" checked> simplify</label>
+      </div>
+      <div id="error"></div>
+      <div id="names"></div>
+      <div id="keypad"></div>
+      <details class="help">
+        <summary>Syntax</summary>
+        <p><code>+</code> sum, <code>*</code> or <code>×</code> product, <code>ω^x</code> (or <code>w^x</code>) exponential,
+          <code>x^3</code> repeated product, <code>log(x)</code>, <code>simp(x)</code>, <code>amal(x, y)</code>.</p>
+        <p>Compare with <code>&lt;</code> <code>&gt;</code> <code>&lt;=</code> <code>&gt;=</code> <code>==</code>.
+          Name a result with <code>G = Γ₀ + 1</code>.</p>
+        <p>Refer to earlier results by name, by <code>$3</code> (history entry), <code>Ans</code> (last result),
+          or <code>#id</code> (content hash, any unique prefix). Raw patterns: <code>[P1;0;2;2=1.1]</code>.</p>
+        <p>Built-ins: <code>w</code>/<code>ω</code>, <code>e0</code>/<code>ε₀</code>, <code>G0</code>/<code>Γ₀</code>.
+          Double-click a history card to insert it.</p>
+      </details>
+    </section>
+    <aside>
+      <div class="asidehead"><h2>History</h2><button id="clearhist">clear</button></div>
+      <div id="history"></div>
+    </aside>
+  </main>
+  <script type="module" src="app.js"></script>
+</body>
+</html>

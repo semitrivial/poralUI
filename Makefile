@@ -13,3 +13,8 @@ example: arith.o core.o example.o patterns.o por.o simp.o
 clean:
 	rm -f *.o
 
+web:
+	bash web/build.sh
+
+.PHONY: all clean web
+
