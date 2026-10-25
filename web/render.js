@@ -97,7 +97,8 @@ export function renderPattern(enc, opts = {}) {
       el('circle', { cx: x, cy: baseY, r: Math.max(8, step / 2), class: 'hit' }, g);
       const title = el('title', {}, g);
       const rel = nd.less1 !== nd.i ? `\n${labels[nd.i]} ≤₁ ${labels[nd.less1]}` : '';
-      title.textContent = `node ${nd.i}: ${labels[nd.i]}${nd.i === pat.point ? '  (designated point)' : ''}${rel}`;
+      title.textContent = `node ${nd.i}: ${labels[nd.i]}${nd.i === pat.point ? '  (designated point)' : ''}${rel}` +
+        (opts.nodeNotes ? `\n= ${opts.nodeNotes[nd.i]}` : '');
       g.addEventListener('mouseenter', () => {
         svg.classList.add('hovering');
         arcEls.forEach(a => { if (+a.dataset.from === nd.i || +a.dataset.to === nd.i) a.classList.add('hot'); });

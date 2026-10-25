@@ -3,6 +3,7 @@ import { Engine, patternId, decodePattern } from './engine.js';
 import { parse, pretty, evaluate, canonicalName } from './lang.js';
 import { renderPattern } from './render.js';
 import { normalForm, nfHtml, nfText } from './nf.js';
+import { realizePattern, verify, format as thetaFormat } from './theta.js';
 
 const $ = s => document.querySelector(s);
 const STORE = 'poral-calculator-v1';
@@ -139,9 +140,30 @@ function renderMain(h, idx) {
     nfBox.innerHTML = `<span class="nflabel">Cantor normal form</span><span class="nferr">${escapeHtml(err.message)}</span>`;
   }
   box.appendChild(nfBox);
+  // Wilken's ϑ-notation (KPℓ₀ normal form), with an independent ≤1 check.
+  const thBox = document.createElement('div');
+  thBox.className = 'nf';
+  let nodeTerms = null;
+  try {
+    const r = realizePattern(pat);
+    const shown = r.vals[r.point];
+    nodeTerms = pat.nodes.map((_, i) => thetaFormat(r.vals[r.inserted && i >= 1 ? i + 1 : i]));
+    let badge = '';
+    if (pat.nodes.length <= 80) {
+      const errs = verify(r);
+      badge = errs.length
+        ? `<span class="nferr" title="${escapeHtml(errs.join('\n'))}">✗ consistency check failed (${errs.length})</span>`
+        : '<span class="nfok" title="Every node’s ϑ-term was recomputed into ≤1-reaches with Wilken’s lh-recursion; order, sums and every ≤1 relation of the pattern are reproduced exactly.">✓ verified</span>';
+    }
+    thBox.innerHTML = `<span class="nflabel" style="text-transform:none">ϑ-NOTATION (KPℓ₀ NF)</span><span class="nfval">${thetaFormat(shown, true)}</span>${badge}`;
+    thBox.title = thetaFormat(shown);
+  } catch (err) {
+    thBox.innerHTML = `<span class="nflabel" style="text-transform:none">ϑ-NOTATION (KPℓ₀ NF)</span><span class="nferr">${escapeHtml(err.message)}</span>`;
+  }
+  box.appendChild(thBox);
   const wrap = document.createElement('div');
   wrap.className = 'svgwrap';
-  wrap.appendChild(renderPattern(h.p, { marks: h.marks }));
+  wrap.appendChild(renderPattern(h.p, { marks: h.marks, nodeNotes: nodeTerms }));
   box.appendChild(wrap);
   const actions = document.createElement('div');
   actions.className = 'actions';
