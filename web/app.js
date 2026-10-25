@@ -78,6 +78,7 @@ function run() {
     if (aname) state.names[aname] = r.p;
     state.history.push({ expr: src, label: aname ? `${aname} = ${label}` : label, p: r.p, marks: r.marks, ms });
     save();
+    selected = state.history.length - 1;
     $('#input').value = '';
     renderAll();
   } catch (err) {
