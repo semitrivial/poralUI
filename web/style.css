@@ -104,3 +104,12 @@ svg.hovering .arc.hot { opacity: 1; stroke-width: 3; }
 .node.point .label { fill: var(--gold); }
 .hit { fill: transparent; }
 .node:hover .dot { fill: var(--accent); }
+
+/* ---- normal form ---- */
+.nf { margin: 10px 0 2px; font-size: 22px; display: flex; flex-wrap: wrap; align-items: baseline; gap: 14px; }
+.nflabel { font: 12px ui-monospace, Menlo, monospace; color: var(--dim); text-transform: uppercase; letter-spacing: 1px; }
+.nfval sup { font-size: 0.68em; vertical-align: 0.75em; line-height: 0; }
+.nfval .eps { color: var(--gold); }
+.nfval .eps.anon sub { font: 0.5em ui-monospace, Menlo, monospace; color: var(--accent2); }
+.nferr { color: var(--bad); font-size: 14px; }
+.nfnote { flex-basis: 100%; font-size: 12px; color: var(--dim); }

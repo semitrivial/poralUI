@@ -2,6 +2,7 @@
 import { Engine, patternId, decodePattern } from './engine.js';
 import { parse, pretty, evaluate, canonicalName } from './lang.js';
 import { renderPattern } from './render.js';
+import { normalForm, nfHtml, nfText } from './nf.js';
 
 const $ = s => document.querySelector(s);
 const STORE = 'poral-calculator-v1';
@@ -126,6 +127,18 @@ function renderMain(h, idx) {
     · point = node ${pat.point}${h.marks ? ` · operands embed at nodes ${h.marks.join(' and ')}` : ''}
     ${h.ms != null ? ` · ${h.ms.toFixed(1)} ms` : ''}</div>`;
   box.appendChild(head);
+  const nfBox = document.createElement('div');
+  nfBox.className = 'nf';
+  try {
+    const t = normalForm(engine, h.p, { ...PRESETS, ...state.names });
+    nfBox.innerHTML = `<span class="nflabel">Cantor normal form</span><span class="nfval">${nfHtml(t)}</span>`;
+    nfBox.title = nfText(t);
+    if (nfBox.querySelector('.eps.anon'))
+      nfBox.innerHTML += '<div class="nfnote">ε<sub>#id</sub> marks an epsilon number with no known name (only ε₀, Γ₀ and your own names are recognised); Cantor normal form cannot break it down further.</div>';
+  } catch (err) {
+    nfBox.innerHTML = `<span class="nflabel">Cantor normal form</span><span class="nferr">${escapeHtml(err.message)}</span>`;
+  }
+  box.appendChild(nfBox);
   const wrap = document.createElement('div');
   wrap.className = 'svgwrap';
   wrap.appendChild(renderPattern(h.p, { marks: h.marks }));
